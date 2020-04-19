@@ -14,7 +14,18 @@ push = require 'push'
 -- https://github.com/vrld/hump/blob/master/class.lua
 Class = require 'class'
 
+require 'StateMachine'
+
 require 'Piece'
+require 'Tower'
+require 'Score'
+
+-- all code related to game state and state machines
+require 'StateMachine'
+require 'states/BaseState'
+require 'states/PlayState'
+require 'states/ScoreState'
+require 'states/TitleScreenState'
 
 WINDOW_WIDTH = 320
 WINDOW_HEIGHT = 720
@@ -22,72 +33,121 @@ WINDOW_HEIGHT = 720
 VIRTUAL_WIDTH = 108
 VIRTUAL_HEIGHT = 243
 
--- speed at which we will move our paddle; multiplied by dt in update
-PADDLE_SPEED = 200
 
---[[
-    Runs when the game first starts up, only once; used to initialize the game.
-]]
+--Runs when the game first starts up, only once; used to initialize the game.
 function love.load()
+
+
+    love.window.setTitle('Crazy Tower')
+
+
+
     love.graphics.setDefaultFilter('nearest', 'nearest')
 
+        -- initialize window with virtual resolution
+        push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
+            fullscreen = false,
+            resizable = false,
+            vsync = true
+        })
+
+        gStateMachine = StateMachine {
+            ['title'] = function() return TitleScreenState() end,
+            ['play'] = function() return PlayState() end,
+        }
+
+        gStateMachine:change('title')
+
     -- more "retro-looking" font object we can use for any text
-    smallFont = love.graphics.newFont('font.ttf', 8)
+    smallFont = love.graphics.newFont('font.ttf', 12)
 
     -- larger font for drawing the score on the screen
-    scoreFont = love.graphics.newFont('font.ttf', 32)
+    scoreFont = love.graphics.newFont('font.ttf', 28)
 
     -- set LÖVE2D's active font to the smallFont obect
     love.graphics.setFont(smallFont)
 
-    -- initialize window with virtual resolution
-    push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
-        fullscreen = false,
-        resizable = false,
-        vsync = true
-    })
+
+    -- love.window.setMode(WINDOW_WIDTH, WINDOW_HEIGHT, {
+    --     fullscreen = false,
+    --     resizable = false,
+    --     vsync = true
+    -- })
+
+    sounds = {
+        ['paddle_hit'] = love.audio.newSource('sounds/paddle_hit.wav', 'static'),
+        ['score'] = love.audio.newSource('sounds/score.wav', 'static'),
+        ['wall_hit'] = love.audio.newSource('sounds/wall_hit.wav', 'static')
+    }
 
     -- math.randomseed(os.time())
 
 
-
-    pieceGoingLeft = true
-    pieceWidth = 40
-    pieceHeight = 5
-    pieceSpeed = 200
-    pieceY = VIRTUAL_HEIGHT-pieceHeight
-    pieceX = 0
-
-    piecesPlaced = {}
-    piecesPlacedNum = 0
-
     previousPieceX = 0
     previousPieceWidth = pieceWidth
 
+    piece = Piece(40, 5,0, VIRTUAL_HEIGHT-5, 200, true)
+    tower = Tower(0,{})
+    score = Score(0)
 
-    gameState = 'start'
+    gameState = 'play'
+
+    -- initialize input table
+    love.keyboard.keysPressed = {}
+
 
 end
 
+
+
+function love.keypressed(key)
+    -- add to our table of keys pressed this frame
+    love.keyboard.keysPressed[key] = true
+    
+    if key == 'escape' then
+        love.event.quit()
+    end
+end
+
+--[[
+    New function used to check our global input table for keys we activated during
+    this frame, looked up by their string value.
+]]
+function love.keyboard.wasPressed(key)
+    if love.keyboard.keysPressed[key] then
+        return true
+    else
+        return false
+    end
+end
 --[[
     Runs every frame, with "dt" passed in, our delta in seconds 
     since the last frame, which LÖVE2D supplies us.
 ]]
 function love.update(dt)
 
+    gStateMachine:update(dt)
+
+
     if gameState =='play' then
-        if pieceGoingLeft == true then
-        pieceX = pieceX + pieceSpeed * dt
-            if pieceX >= VIRTUAL_WIDTH - pieceWidth then
-                pieceGoingLeft = false
-            end
-        else
-            pieceX = pieceX - pieceSpeed * dt
-            if pieceX <= 0 then
-                pieceGoingLeft = true
-            end
+
+        piece:update(dt)
+        score:update()
+
+        if piece.width == 0 then
+            gameState = 'gameOver'
         end
+
     end
+
+    if gameState =='gameOver' then
+
+        piece:reset()
+        -- tower:reset()
+        -- score:reset()
+
+    end
+
 
 end
 
@@ -108,96 +168,17 @@ function love.keypressed(key)
         else
         gameState = 'start'
 
-        pieceGoingLeft = true
-        pieceWidth = 40
-        pieceHeight = 5
-        pieceSpeed = 100
-        pieceY = VIRTUAL_HEIGHT-pieceHeight
-        pieceX = 0
-    
-        piecesPlaced = {}
-        piecesPlacedNum = 0
-    
-        previousPieceX = 0
-        previousPieceWidth = pieceWidth
-    
+        piece:reset()
+        tower:reset()
+        score:reset()
+
         end
     end
 
     if key == 'space' then
-
-        -- if we haven't put anything down yet
-        if piecesPlacedNum == 0 then
-
-        table.insert(piecesPlaced, {pieceX , pieceY, pieceWidth})
-
-        else
-
-            -- if it hangs over the left
-            if pieceX <= previousPieceX then 
-            
-            pieceWidth = pieceWidth - (previousPieceX - pieceX)
-
-            table.insert(piecesPlaced, {previousPieceX , pieceY, pieceWidth})
-
-            -- previousPieceX = pieceX
-
-            -- piecesPlacedNum = piecesPlacedNum + 1
-
-
-            -- if it hangs over the right
-
-            elseif pieceX >= previousPieceX then
-
-            pieceWidth = pieceWidth - (pieceX - previousPieceX)
-
-            table.insert(piecesPlaced, {pieceX , pieceY, pieceWidth})
-
-
-            -- if it's perfect placement
-
-            else
-
-            table.insert(piecesPlaced, {pieceX , pieceY, pieceWidth})
-
-            -- previousPieceX = pieceX
-
-            -- piecesPlacedNum = piecesPlacedNum + 1
-
-            end
-
-        -- piecesPlacedNum = piecesPlacedNum + 1
-        -- previousPieceWidth = pieceWidth
-        -- previousPieceX = pieceX
-        -- pieceY = pieceY - 5
-
-        end
-
-        piecesPlacedNum = piecesPlacedNum + 1
-
-        previousPieceWidth = pieceWidth
-        previousPieceX = pieceX
-
-        pieceY = pieceY - 5
-
-        if pieceWidth <= 0 then
-            gameState = 'start'
-
-            pieceGoingLeft = true
-            pieceWidth = 40
-            pieceHeight = 5
-            pieceSpeed = 200
-            pieceY = VIRTUAL_HEIGHT-pieceHeight
-            pieceX = 0
-        
-            piecesPlaced = {}
-            piecesPlacedNum = 0
-        
-            previousPieceX = 0
-            previousPieceWidth = pieceWidth
-        
-        end
+        tower:update()
     end
+
 
 
 end
@@ -209,59 +190,26 @@ end
     updated or otherwise.
 ]]
 function love.draw()
-    -- begin rendering at virtual resolution
+
     push:apply('start')
 
-    -- clear the screen with a specific color; in this case, a color similar
-    -- to some versions of the original Pong
-    love.graphics.clear(40/255, 45/255, 52/255, 255/255)
+    gStateMachine:render()
+    
+    -- clear the screen with a specific color
 
-    -- draw welcome text toward the top of the screen
-    love.graphics.setFont(smallFont)
-    love.graphics.printf('Crazy Tower', 0, 20, VIRTUAL_WIDTH, 'center')
 
-    -- render first paddle (left side), now using the players' Y variable
-    love.graphics.rectangle('fill', pieceX, pieceY, pieceWidth, pieceHeight)
+    if gameState =='gameOver' then
+        love.graphics.clear(40/255, 45/255, 52/255, 255/255)
+        tower:render()
+        score:render()
 
-    if  piecesPlacedNum >= 1 then
-        for k, v in pairs(piecesPlaced) do
-            love.graphics.rectangle('fill', v[1], v[2], v[3], pieceHeight)
-        end
+        love.graphics.printf('Game Over', 0, 40, VIRTUAL_WIDTH, 'center')
+
+
     end
 
-    -- draw score on the left and right center of the screen
-    -- need to switch font to draw before actually printing
-    -- love.graphics.setFont(scoreFont)
-    -- love.graphics.print(tostring(piecesPlaced[1]), VIRTUAL_WIDTH / 2 - 50, 
-    --     VIRTUAL_HEIGHT / 3)
-    -- love.graphics.print(tostring(player2Score), VIRTUAL_WIDTH / 2 + 30,
-    --     VIRTUAL_HEIGHT / 3)
-
-
-   
-
-    -- end rendering at virtual resolution
     push:apply('end')
 
 
 end
 
-
-
-    -- -- player 1 movement
-    -- if love.keyboard.isDown('w') then
-    --     -- add negative paddle speed to current Y scaled by deltaTime
-    --     player1Y = math.max(0, player1Y + -PADDLE_SPEED * dt)
-    -- elseif love.keyboard.isDown('s') then
-    --     -- add positive paddle speed to current Y scaled by deltaTime
-    --     player1Y = math.min(VIRTUAL_HEIGHT - 20, player1Y + PADDLE_SPEED * dt)
-    -- end
-
-    -- -- player 2 movement
-    -- if love.keyboard.isDown('up') then
-    --     -- add negative paddle speed to current Y scaled by deltaTime
-    --     player2Y = math.max(0, player2Y + -PADDLE_SPEED * dt)
-    -- elseif love.keyboard.isDown('down') then
-    --     -- add positive paddle speed to current Y scaled by deltaTime
-    --     player2Y = math.min(VIRTUAL_HEIGHT - 20, player2Y + PADDLE_SPEED * dt)
-    -- end
