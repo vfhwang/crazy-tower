@@ -15,7 +15,7 @@ spinLeft = true
 
 
 function TitleScreenState:update(dt)
-    if love.keyboard.wasPressed('enter') or love.keyboard.wasPressed('return') then
+    if love.keyboard.wasPressed('space') then
         gStateMachine:change('play')
     end
 
@@ -36,14 +36,13 @@ end
 
 function TitleScreenState:render()
 
-    love.graphics.clear(40/255, 45/255, 52/255, 255/255)
 
     love.graphics.setFont(scoreFont)
 
     love.graphics.translate(VIRTUAL_WIDTH/2, 40)
     love.graphics.rotate(titleRotation)
     
-    love.graphics.printf('Crazy Tower', (-VIRTUAL_WIDTH/2)+4, -20, VIRTUAL_WIDTH, 'center')
+    love.graphics.printf('Fishy', (-VIRTUAL_WIDTH/2)+4, -20, VIRTUAL_WIDTH, 'center')
 
     love.graphics.origin()
 
@@ -51,7 +50,7 @@ function TitleScreenState:render()
     love.graphics.printf('Spacebar to start', 0, VIRTUAL_HEIGHT-60, VIRTUAL_WIDTH, 'center')
 
 
-    piece:render()
-    tower:render()
+    -- piece:render()
+    -- tower:render()
     -- score:render()
 end

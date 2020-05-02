@@ -2,9 +2,16 @@ Tower = Class{}
 
 
 -- Setting up the piece
-function Tower:init(numberOfPieces,stack)
+function Tower:init(numberOfPieces,stack,left,right)
     self.numberOfPieces = numberOfPieces
     self.stack = stack
+    r = 255/255
+    g = 255/255
+    b = 255/255
+    a = 255/255
+    self.left = left
+    self.right = right
+
 end
 
 -- Reset the piece to default
@@ -14,73 +21,26 @@ function Tower:reset()
 end
 
 -- Adding pieces to the tower
-function Tower:update()
+function Tower:update(x,y,w)
 
 
-    piece.x = math.floor(piece.x+0.5)
-    if self.numberOfPieces > 0 then
+    table.insert(self.stack, {x, y, w,{r,g,b,a}})
+    self.numberOfPieces = self.numberOfPieces + 1
 
+    r = r - 5/255
+    g = g - 5/255
+    b = b - 5/255
 
-
-        -- if it hangs over the left
-        if piece.x <= towerLeft then 
-
-
-            print ('HANGING TO THE LEFT')
-            --cut it down to size
-            piece.width = math.max(0,piece.width - (towerLeft - piece.x))
-
-            --place it at the edge of the tower
-            table.insert(self.stack, {towerLeft, piece.y, piece.width})
-            
-            towerRight = towerLeft + piece.width
-
-
-        -- if it hangs over the right
-        elseif piece.x >= towerLeft then
-            print ('HANGING TO THE RIGHT | x: '  .. tostring(piece.x) .. ' Tower left: '  .. tostring(towerLeft))
-            --Cut the width down to size
-            piece.width = math.max(0,piece.width - (piece.x - towerLeft))
-
-            --Place it where it stopped
-
-
-            table.insert(self.stack, {piece.x, piece.y, piece.width})
-
-            towerLeft = piece.x
-
-            print ('New Tower left: '  .. tostring(towerLeft))
-
-
-        -- if it's perfect placement
-        else
-            print ('PERFECTO')
-            table.insert(self.stack, {piece.x, piece.y, piece.width})
-
-        end
-
-    else
-
-    table.insert(self.stack, {piece.x, piece.y, piece.width})
-
-    towerLeft = piece.x
-    towerRight = piece.x + piece.width
-
-    end
-
-    sounds['paddle_hit']:play()
-    tower.numberOfPieces = tower.numberOfPieces + 1
-
-    piece.speed = piece.speed *1.03
-    piece.y = piece.y - piece.height
 
 end
 
 -- Draw the tower to the screen
 function Tower:render()
-    if  tower.numberOfPieces >= 1 then
-        for k, v in pairs(tower.stack) do
-            love.graphics.rectangle('fill', v[1], v[2], v[3], piece.height)
+    if  self.numberOfPieces >= 1 then
+        for k, v in pairs(self.stack) do
+
+            love.graphics.setColor(v[4])
+            love.graphics.rectangle('fill', v[1], v[2], v[3], 5)
         end
     end
 

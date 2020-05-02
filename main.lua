@@ -13,32 +13,39 @@ push = require 'push'
 --
 -- https://github.com/vrld/hump/blob/master/class.lua
 Class = require 'class'
+gamera = require 'gamera'
+
 
 require 'StateMachine'
 
-require 'Piece'
-require 'Tower'
+
+require 'Fish'
+require 'Food'
+-- require 'Tower'
 require 'Score'
 
 -- all code related to game state and state machines
 require 'StateMachine'
 require 'states/BaseState'
 require 'states/PlayState'
-require 'states/ScoreState'
+require 'states/GameOverState'
 require 'states/TitleScreenState'
 
-WINDOW_WIDTH = 320
-WINDOW_HEIGHT = 720
 
-VIRTUAL_WIDTH = 108
-VIRTUAL_HEIGHT = 243
+WINDOW_WIDTH = 900
+WINDOW_HEIGHT = 600
 
+VIRTUAL_WIDTH = 300
+VIRTUAL_HEIGHT = 200
+
+PLAY_WIDTH = 500
+PLAY_HEIGHT = 500
 
 --Runs when the game first starts up, only once; used to initialize the game.
 function love.load()
 
 
-    love.window.setTitle('Crazy Tower')
+    love.window.setTitle('Fishy')
 
 
 
@@ -54,9 +61,10 @@ function love.load()
         gStateMachine = StateMachine {
             ['title'] = function() return TitleScreenState() end,
             ['play'] = function() return PlayState() end,
+            ['gameover'] = function() return GameOverState() end,
+
         }
 
-        gStateMachine:change('title')
 
     -- more "retro-looking" font object we can use for any text
     smallFont = love.graphics.newFont('font.ttf', 12)
@@ -67,6 +75,7 @@ function love.load()
     -- set LÖVE2D's active font to the smallFont obect
     love.graphics.setFont(smallFont)
 
+    gStateMachine:change('title')
 
     -- love.window.setMode(WINDOW_WIDTH, WINDOW_HEIGHT, {
     --     fullscreen = false,
@@ -86,9 +95,9 @@ function love.load()
     previousPieceX = 0
     previousPieceWidth = pieceWidth
 
-    piece = Piece(40, 5,0, VIRTUAL_HEIGHT-5, 200, true)
-    tower = Tower(0,{})
-    score = Score(0)
+
+    cam = gamera.new(0,0,PLAY_WIDTH,PLAY_HEIGHT)
+    -- cam:setWindow(10,10,90,90)
 
     gameState = 'play'
 
@@ -128,61 +137,9 @@ function love.update(dt)
 
     gStateMachine:update(dt)
 
-
-    if gameState =='play' then
-
-        piece:update(dt)
-        score:update()
-
-        if piece.width == 0 then
-            gameState = 'gameOver'
-        end
-
-    end
-
-    if gameState =='gameOver' then
-
-        piece:reset()
-        -- tower:reset()
-        -- score:reset()
-
-    end
-
+    love.keyboard.keysPressed = {}
 
 end
-
---[[
-    Keyboard handling, called by LÖVE2D each frame; 
-    passes in the key we pressed so we can access.
-]]
-function love.keypressed(key)
-    -- keys can be accessed by string name
-    if key == 'escape' then
-        -- function LÖVE gives us to terminate application
-        love.event.quit()
-    end
-
-    if key == 'return' then
-        if  gameState == 'start' then
-        gameState = 'play'
-        else
-        gameState = 'start'
-
-        piece:reset()
-        tower:reset()
-        score:reset()
-
-        end
-    end
-
-    if key == 'space' then
-        tower:update()
-    end
-
-
-
-end
-
 
 
 --[[
@@ -193,21 +150,10 @@ function love.draw()
 
     push:apply('start')
 
+    love.graphics.clear(40/255, 45/255, 52/255, 255/255)
+
     gStateMachine:render()
     
-    -- clear the screen with a specific color
-
-
-    if gameState =='gameOver' then
-        love.graphics.clear(40/255, 45/255, 52/255, 255/255)
-        tower:render()
-        score:render()
-
-        love.graphics.printf('Game Over', 0, 40, VIRTUAL_WIDTH, 'center')
-
-
-    end
-
     push:apply('end')
 
 
