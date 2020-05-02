@@ -10,7 +10,7 @@ function Fish:init(x, y, width, height)
     self.velocity = 3
     self.dx = 0
     self.dy = 0
-    self.maxspeed = 1.5
+    self.maxspeed = 10
 
 end
 
@@ -25,42 +25,66 @@ end
 function Fish:update(dt)
 
 
-
+    -- Bouncing off the walls
     if self.x < 0 then
+        self.dx = 5
         self.x = 0 + 1
     end
     if self.y < 0 then
+        self.dy = 5
         self.y = 0 + 1
     end
 
     if self.x > PLAY_WIDTH then
+        self.dx = -5
         self.x = PLAY_WIDTH - 1
     end
     if self.y > PLAY_HEIGHT then
+        self.dy = -5
         self.y = PLAY_HEIGHT - 1
     end
 
     if love.keyboard.isDown('w') or love.keyboard.isDown('a') or love.keyboard.isDown('s')  or love.keyboard.isDown('d') then
     if love.keyboard.isDown('a') then
         -- print('left!')
+
+        -- If we're travelling right
+        if self.dx >=0 then
+
+        -- then turn around super fast
+        self.dx = self.dx - (self.velocity * self.velocity) * dt
+
+        -- otherwise just accelerate till max speed
+        else
         self.dx = math.max(self.dx - self.velocity * dt,-self.maxspeed)
+        end
     end
 
     if love.keyboard.isDown('d') then
         -- print('right!')
+        if self.dx <=0 then
+        self.dx = self.dx + (self.velocity * self.velocity) * dt
+        else
         self.dx = math.min(self.dx + self.velocity * dt,self.maxspeed)
-
+        end
     end
 
     if love.keyboard.isDown('w') then
             -- print('up!')
+        if self.dy >= 0 then
+            self.dy = self.dy - (self.velocity * self.velocity) * dt
+            else
         self.dy = math.max(self.dy - self.velocity * dt,-self.maxspeed)
- 
+            end
     end
 
-    if love.keyboard.isDown('s') then        
+    if love.keyboard.isDown('s') then 
+        if self.dy <=0 then
+            self.dy = self.dy + (self.velocity * self.velocity) * dt
+            else       
         -- print('down!')
         self.dy = math.min(self.dy + self.velocity * dt,self.maxspeed)
+            end
     end
 
     if love.keyboard.wasPressed('space') then
@@ -72,6 +96,7 @@ function Fish:update(dt)
 
     else
 
+        --Deceleration
         if self.dx > 0 then
             self.dx = self.dx - 1 * dt
         else 
@@ -106,6 +131,6 @@ end
 
 -- Draw the Fish to the screen
 function Fish:render()
-    love.graphics.setColor(255,0,229,255)
+    love.graphics.setColor(253/255,139/255,138/255,255/255)
     love.graphics.circle('fill', self.x, self.y, self.width)
 end

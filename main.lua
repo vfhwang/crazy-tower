@@ -22,6 +22,7 @@ require 'StateMachine'
 require 'Fish'
 require 'Food'
 require 'Score'
+require 'Fish2'
 
 -- all code related to game state and state machines
 require 'StateMachine'
@@ -34,8 +35,8 @@ require 'states/TitleScreenState'
 WINDOW_WIDTH = 900
 WINDOW_HEIGHT = 600
 
-PLAY_WIDTH = 500
-PLAY_HEIGHT = 500
+PLAY_WIDTH = 2000
+PLAY_HEIGHT = 2000
 
 --Runs when the game first starts up, only once; used to initialize the game.
 function love.load()
@@ -87,9 +88,7 @@ function love.load()
     -- })
 
     sounds = {
-        ['paddle_hit'] = love.audio.newSource('sounds/paddle_hit.wav', 'static'),
-        ['score'] = love.audio.newSource('sounds/score.wav', 'static'),
-        ['wall_hit'] = love.audio.newSource('sounds/wall_hit.wav', 'static')
+        ['eat'] = love.audio.newSource('sounds/eat.mp3', 'static')
     }
 
     -- math.randomseed(os.time())
@@ -153,7 +152,7 @@ function love.draw()
 
     -- push:apply('start')
 
-    love.graphics.clear(40/255, 45/255, 52/255, 255/255)
+    love.graphics.clear(6/255, 58/255, 58/255, 255/255)
 
     gStateMachine:render()
     
