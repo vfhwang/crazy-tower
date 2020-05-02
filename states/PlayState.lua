@@ -34,7 +34,7 @@ function PlayState:update(dt)
     
     self.fish:update(dt)
     self.food:update(dt)
-    self.fish2:update(dt, self.food)
+    self.fish2:update(dt, self.food.scattered)
 
     cam:setPosition(self.fish.x + (WINDOW_WIDTH/2), self.fish.y + (WINDOW_HEIGHT/2))
 

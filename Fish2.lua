@@ -1,6 +1,30 @@
 Fish2 = Class{}
 
 
+function FindNearest(x,y,food)
+    local lowest = math.huge -- infinity
+    local NearestFood = nil
+
+    for k,v in pairs(food) do
+
+    function distanceFrom(x1,y1,x2,y2) return math.sqrt((x2 - x1) ^ 2 + (y2 - y1) ^ 2) end
+    
+    distance = distanceFrom(x,y,v[1],v[2])
+    -- print('distance to food bit ' .. k .. ' is ' .. distanceFrom(x,y,v[1],v[2]))
+
+        -- if v and v.Character then
+        --     local distance = v:DistanceFromCharacter(position)
+            if distance < lowest then
+                lowest = distance
+                NearestFood = k
+            end
+        -- end
+    end
+    return NearestFood
+end
+
+
+
 -- Setting up the Fish2
 function Fish2:init(x, y, width, height)
     self.x = x
@@ -11,7 +35,7 @@ function Fish2:init(x, y, width, height)
     self.dx = 0
     self.dy = 0
     self.maxspeed = 10
-
+    self.nearestFood = nil
 end
 
 -- Reset the Fish2 to default
@@ -24,8 +48,11 @@ end
 -- Once the game starts, make the Fish2 move left and right
 function Fish2:update(dt, food)
 
+    food = food
+    self.nearestFood =  FindNearest(self.x,self.y,food)
 
-print(food)
+    print('nearest food is ' .. self.nearestFood)
+    
 
     --Bounding off the walls
     if self.x < 0 then
@@ -60,22 +87,12 @@ print(food)
                 self.dy = self.dy + 1 * dt
             end
 
-            -- function FindNearest(position)
-            --     local lowest = math.huge -- infinity
-            --     local NearestFood = nil
-            --     for i,v in pairs(game.Players:GetPlayers())
-            --         if v and v.Character then
-            --             local distance = v:DistanceFromCharacter(position)
-            --             if distance < lowest then
-            --                 lowest = distance
-            --                 NearestPlayer = v
-            --             end
-            --         end
-            --     end
-            --     return NearestPlayer
-            -- end
+        
+
+
             
-            print(FindNearest(position)) -- change position to the position of the Zombie's upper/lower torso, or head.
+            -- print(FindNearest(position))
+            -- change position to the position of the Zombie's upper/lower torso, or head.
 
 
     self.y = self.y + self.dy
