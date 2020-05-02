@@ -37,17 +37,17 @@ end
 function TitleScreenState:render()
 
 
-    love.graphics.setFont(scoreFont)
+    love.graphics.setFont(titleFont)
 
-    love.graphics.translate(VIRTUAL_WIDTH/2, 40)
-    love.graphics.rotate(titleRotation)
-    
-    love.graphics.printf('Fishy', (-VIRTUAL_WIDTH/2)+4, -20, VIRTUAL_WIDTH, 'center')
+    love.graphics.translate(WINDOW_WIDTH/2, WINDOW_HEIGHT/2-40)
+    -- love.graphics.rotate(titleRotation)
+    love.graphics.setColor(47/255,128/255,237/255,255/255)
+    love.graphics.printf('Fish', (-WINDOW_WIDTH/2)+4, -20, WINDOW_WIDTH, 'center')
 
     love.graphics.origin()
 
     love.graphics.setFont(smallFont)
-    love.graphics.printf('Spacebar to start', 0, VIRTUAL_HEIGHT-60, VIRTUAL_WIDTH, 'center')
+    love.graphics.printf('Spacebar to start', 0, WINDOW_HEIGHT-60, WINDOW_WIDTH, 'center')
 
 
     -- piece:render()

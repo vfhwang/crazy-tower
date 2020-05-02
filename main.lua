@@ -5,7 +5,7 @@
 -- a more retro aesthetic
 --
 -- https://github.com/Ulydev/push
-push = require 'push'
+-- push = require 'push'
 
 -- the "Class" library we're using will allow us to represent anything in
 -- our game as code, rather than keeping track of many disparate variables and
@@ -21,7 +21,6 @@ require 'StateMachine'
 
 require 'Fish'
 require 'Food'
--- require 'Tower'
 require 'Score'
 
 -- all code related to game state and state machines
@@ -34,9 +33,6 @@ require 'states/TitleScreenState'
 
 WINDOW_WIDTH = 900
 WINDOW_HEIGHT = 600
-
-VIRTUAL_WIDTH = 300
-VIRTUAL_HEIGHT = 200
 
 PLAY_WIDTH = 500
 PLAY_HEIGHT = 500
@@ -52,11 +48,18 @@ function love.load()
     love.graphics.setDefaultFilter('nearest', 'nearest')
 
         -- initialize window with virtual resolution
-        push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
+        -- push:setupScreen(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
+        --     fullscreen = false,
+        --     resizable = false,
+        --     vsync = true
+        -- })
+
+        love.window.setMode(WINDOW_WIDTH, WINDOW_HEIGHT, {
             fullscreen = false,
             resizable = false,
             vsync = true
         })
+
 
         gStateMachine = StateMachine {
             ['title'] = function() return TitleScreenState() end,
@@ -67,10 +70,10 @@ function love.load()
 
 
     -- more "retro-looking" font object we can use for any text
-    smallFont = love.graphics.newFont('font.ttf', 12)
+    smallFont = love.graphics.newFont('fonts/Avara-BoldItalic.otf', 12)
 
     -- larger font for drawing the score on the screen
-    scoreFont = love.graphics.newFont('font.ttf', 28)
+    titleFont = love.graphics.newFont('fonts/Avara-BoldItalic.otf', 100)
 
     -- set LÖVE2D's active font to the smallFont obect
     love.graphics.setFont(smallFont)
@@ -148,13 +151,13 @@ end
 ]]
 function love.draw()
 
-    push:apply('start')
+    -- push:apply('start')
 
     love.graphics.clear(40/255, 45/255, 52/255, 255/255)
 
     gStateMachine:render()
     
-    push:apply('end')
+    -- push:apply('end')
 
 
 end
