@@ -8,7 +8,7 @@ spinLeft = true
 
 function GameOverState:enter(params)
     self.score = params.score
-
+    self.win = params.win
     print ('game over')
 end
 
@@ -26,8 +26,12 @@ function GameOverState:render()
 
     love.graphics.setColor(47/255,128/255,237/255,255/255)
 
-    love.graphics.printf('Game Over', 0, 100 , WINDOW_WIDTH, 'center')
+    if self.win then
+        love.graphics.printf('Winner!', 0, 100 , WINDOW_WIDTH, 'center')
 
+    else
+    love.graphics.printf('Game Over', 0, 100 , WINDOW_WIDTH, 'center')
+    end
 
     love.graphics.setFont(titleFont)
     love.graphics.printf('Your fish was ' .. self.score/10 .. ' kg', 0, WINDOW_HEIGHT/2-150, WINDOW_WIDTH, 'center')

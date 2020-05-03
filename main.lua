@@ -18,6 +18,7 @@ gamera = require 'gamera'
 
 require 'StateMachine'
 
+HC = require 'HC'
 
 require 'Fish'
 require 'Food'
@@ -45,6 +46,7 @@ function love.load()
     love.window.setTitle('Fishy')
 
 
+    rect = HC.rectangle(200,400,400,20)
 
     love.graphics.setDefaultFilter('nearest', 'nearest')
 

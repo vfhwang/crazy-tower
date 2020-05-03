@@ -25,24 +25,26 @@ end
 function Fish:update(dt)
 
 
-    -- Bouncing off the walls
-    if self.x < 0 then
+    --Bounding off the walls
+    if self.x - self.width < 0 then
         self.dx = 5
-        self.x = 0 + 1
+        self.x = self.width + 1
     end
-    if self.y < 0 then
+    if self.y - self.width < 0 then
         self.dy = 5
-        self.y = 0 + 1
+        self.y = self.width + 1
     end
 
-    if self.x > PLAY_WIDTH then
+    if self.x + self.width > PLAY_WIDTH then
         self.dx = -5
-        self.x = PLAY_WIDTH - 1
+        self.x = PLAY_WIDTH - self.width - 1
     end
-    if self.y > PLAY_HEIGHT then
+    if self.y + self.width > PLAY_HEIGHT then
         self.dy = -5
-        self.y = PLAY_HEIGHT - 1
+        self.y = PLAY_HEIGHT - self.width - 1
     end
+
+
 
     if love.keyboard.isDown('w') or love.keyboard.isDown('a') or love.keyboard.isDown('s')  or love.keyboard.isDown('d') then
     if love.keyboard.isDown('a') then

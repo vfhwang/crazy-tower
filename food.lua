@@ -32,29 +32,12 @@ function Food:update(dt)
         -- x = v[1]
         -- y = v[2]
 
-        v[1] = v[1] + 10 * dt        
+
+        -- move the food
+        -- v[1] = v[1] + 10 * dt        
 
 
-        -- if  math.floor(self.fish.x - (self.fish.width)) <= math.floor(v[1]) and math.floor(self.fish.x + (self.fish.width)) >= math.floor(v[1]) 
-        --     and 
-        --     math.floor(self.fish.y - (self.fish.width)) <= math.floor(v[2]) and math.floor(self.fish.y + (self.fish.width)) >= math.floor(v[2]) 
-        -- then
-        --     -- if the fish is smaller than the food
-        --     if self.fish.width < v[3] + 1 then
 
-        --     gStateMachine:change('gameover', {
-        --     score = self.fish.width, 
-        -- })
-
-        --     else
-        --     sounds['eat']:play()
-        --     print('EAT!' .. k)
-        --     self.food:eaten(k)
-        --     self.fish.width = self.fish.width + v[3]/2
-
-
-        --     end
-        -- end
 
 
     end

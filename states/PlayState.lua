@@ -21,11 +21,13 @@ function PlayState:init()
     self.score = 0
     self.dotToCollect = {false,null}
     self.gravity = 200
+
+    self.food = Food(40)
+    self.fish2 = Fish2(20,20,4)
+
     self.camX = 0
     self.camY = 0
-    self.food = Food(40)
-    self.fish2 = Fish2(PLAY_WIDTH/2-20,PLAY_HEIGHT/2-20,4)
-
+    self.zoomLevel = 1
 
 end
 
@@ -36,7 +38,6 @@ function PlayState:update(dt)
     self.food:update(dt)
     self.fish2:update(dt, self.food.scattered)
 
-    cam:setPosition(self.fish.x + (WINDOW_WIDTH/2), self.fish.y + (WINDOW_HEIGHT/2))
 
 
     self.camX = self.fish.x - (WINDOW_WIDTH/2)
@@ -52,11 +53,13 @@ function PlayState:update(dt)
         if  math.floor(self.fish.x - (self.fish.width)) <= math.floor(v[1]) and math.floor(self.fish.x + (self.fish.width)) >= math.floor(v[1]) 
             and 
             math.floor(self.fish.y - (self.fish.width)) <= math.floor(v[2]) and math.floor(self.fish.y + (self.fish.width)) >= math.floor(v[2]) 
+
         then
             -- if the fish is smaller than the food
             if self.fish.width < v[3] + 1 then
 
             gStateMachine:change('gameover', {
+            win = false,
             score = self.fish.width, 
         })
 
@@ -69,6 +72,67 @@ function PlayState:update(dt)
 
             end
         end
+
+        if  
+        math.floor(self.fish2.x - (self.fish2.width)) <= math.floor(v[1]) and math.floor(self.fish2.x + (self.fish2.width)) >= math.floor(v[1]) 
+        and 
+        math.floor(self.fish2.y - (self.fish2.width)) <= math.floor(v[2]) and math.floor(self.fish2.y + (self.fish2.width)) >= math.floor(v[2]) 
+        then
+        sounds['eat']:play()
+        print('EAT!' .. k)
+        self.food:eaten(k)
+        self.fish2.width = self.fish2.width + v[3]/2
+        end
+
+
+        -- camera zooming out
+        -- if self.fish.width > 10 and self.fish.width <= 20 then
+        --     while self.zoomLevel > 0.8 do
+        --         print(self.zoomLevel)
+        --         self.zoomLevel = self.zoomLevel - 0.0001 * dt
+        --     end
+        -- elseif self.fish.width > 20  and self.fish.width <= 30 then
+        --     print(self.fish.width)
+        --     self.zoomLevel = 0.6
+        -- elseif self.fish.width > 30  and self.fish.width <= 40 then
+        --     print(self.fish.width)
+        --     self.zoomLevel = 0.4
+        -- elseif self.fish.width > 300 then
+        --     gStateMachine:change('gameover', {
+        --         score = self.fish.width, 
+        --     })
+        -- end
+
+
+        if  
+        math.floor(self.fish2.x - (self.fish2.width)) <= math.floor(self.fish.x + (self.fish.width)) and math.floor(self.fish2.x + (self.fish2.width)) >= math.floor(self.fish.x - (self.fish.width)) 
+        and 
+        math.floor(self.fish2.y - (self.fish2.width)) <= math.floor(self.fish.y + (self.fish.width)) and math.floor(self.fish2.y + (self.fish2.width)) >= math.floor(self.fish.y - (self.fish.width)) 
+        then
+            --if the player is bigger than the other fish
+            if self.fish.width >= self.fish2.width then
+
+                gStateMachine:change('gameover', {
+                    win = true,
+                    score = self.fish.width, 
+                })
+
+            --otherwise game over!
+            else
+
+                gStateMachine:change('gameover', {
+                    win = false,
+                    score = self.fish.width, 
+                })
+        
+            end
+
+            print('COLISSION!!!!' .. self.fish.width)
+        end
+
+
+        
+        
     end
 
     -- print('fish x = ' .. self.fish.x)
@@ -80,6 +144,7 @@ function PlayState:render()
 
     love.graphics.clear(6/255, 58/255, 58/255, 255/255)
 
+    love.graphics.scale(self.zoomLevel,self.zoomLevel)
     love.graphics.translate(-math.floor(self.camX),-math.floor(self.camY))
 
 
@@ -90,6 +155,7 @@ function PlayState:render()
     -- love.graphics.draw(sea, -200, -200, 0, 10, 10)
     self.food:render()
     self.fish:render()
+    self.fish2:render()
     -- cam:draw(function(l,t,w,h)
 
     --   end)

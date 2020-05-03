@@ -1,7 +1,7 @@
 Fish2 = Class{}
 
 
-function FindNearest(x,y,food)
+function FindNearest(x,y,food,width)
     local lowest = math.huge -- infinity
     local NearestFood = nil
 
@@ -9,6 +9,8 @@ function FindNearest(x,y,food)
 
     function distanceFrom(x1,y1,x2,y2) return math.sqrt((x2 - x1) ^ 2 + (y2 - y1) ^ 2) end
     
+    if v[3] < width then
+
     distance = distanceFrom(x,y,v[1],v[2])
     -- print('distance to food bit ' .. k .. ' is ' .. distanceFrom(x,y,v[1],v[2]))
 
@@ -20,7 +22,9 @@ function FindNearest(x,y,food)
             end
         -- end
     end
+    end
     return NearestFood
+
 end
 
 
@@ -31,10 +35,10 @@ function Fish2:init(x, y, width, height)
     self.y = y
     self.width = width
     self.height = height
-    self.velocity = 3
+    self.velocity = 2
     self.dx = 0
     self.dy = 0
-    self.maxspeed = 10
+    self.maxspeed = 5
     self.nearestFood = nil
 end
 
@@ -48,53 +52,87 @@ end
 -- Once the game starts, make the Fish2 move left and right
 function Fish2:update(dt, food)
 
-    food = food
-    self.nearestFood =  FindNearest(self.x,self.y,food)
 
-    print('nearest food is ' .. self.nearestFood)
+    --find the nearest bit of food
+    
+if  self.nearestFood == nil then
+self.nearestFood =  FindNearest(self.x,self.y,food,width)
+end
+
+
+    -- print('nearest food is ' .. self.nearestFood)
+
+    -- print('my x is ' .. self.x .. 'my y is ' .. self.y)
+
+
+    if food[self.nearestFood] then
+
+        thispiece = food[self.nearestFood]
+
+        local thispieceX = thispiece[1]
+        local thispieceY = thispiece[2]
+
+        -- print('nearest food x is ' .. thispieceX .. 'nearest food y is ' .. thispieceY)
+
+
+        if thispieceY > self.y then
+            -- print('it is below you')
+            self.dy = math.min(self.dy + self.velocity * dt,self.maxspeed)
+        else
+            -- print('it is above you')
+            self.dy = self.dy - (self.velocity * self.velocity) * dt
+        end
+
+        if thispieceX > self.x then
+            -- print('it is right of you')
+            self.dx = math.min(self.dx + self.velocity * dt,self.maxspeed)
+
+        else
+            -- print('it is left of you')
+            self.dx = math.max(self.dx - self.velocity * dt,-self.maxspeed)
+
+        end
+    else
+        self.nearestFood =  FindNearest(self.x,self.y,food,self.width)
+    end
+
     
 
     --Bounding off the walls
-    if self.x < 0 then
+    if self.x - self.width < 0 then
         self.dx = 5
-        self.x = 0 + 1
+        self.x = self.width + 1
     end
-    if self.y < 0 then
+    if self.y - self.width < 0 then
         self.dy = 5
-        self.y = 0 + 1
+        self.y = self.width + 1
     end
 
-    if self.x > PLAY_WIDTH then
+    if self.x + self.width > PLAY_WIDTH then
         self.dx = -5
-        self.x = PLAY_WIDTH - 1
+        self.x = PLAY_WIDTH - self.width - 1
     end
-    if self.y > PLAY_HEIGHT then
+    if self.y + self.width > PLAY_HEIGHT then
         self.dy = -5
-        self.y = PLAY_HEIGHT - 1
+        self.y = PLAY_HEIGHT - self.width - 1
     end
 
 
-        --Deceleration
-        if self.dx > 0 then
-            self.dx = self.dx - 1 * dt
+    --Deceleration
+    if self.dx > 0 then
+        self.dx = self.dx - 1 * dt
+    else 
+        self.dx = self.dx + 1 * dt
+    end
+
+    if self.dy > 0 then
+            self.dy = self.dy - 1 * dt
         else 
-            self.dx = self.dx + 1 * dt
+            self.dy = self.dy + 1 * dt
         end
 
-        if self.dy > 0 then
-                self.dy = self.dy - 1 * dt
-            else 
-                self.dy = self.dy + 1 * dt
-            end
-
-        
-
-
-            
-            -- print(FindNearest(position))
-            -- change position to the position of the Zombie's upper/lower torso, or head.
-
-
+    
+    --movement
     self.y = self.y + self.dy
     self.x = self.x + self.dx
 
